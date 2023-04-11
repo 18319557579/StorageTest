@@ -4,12 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:orientation="vertical">
 
     <Button
-        android:id="@+id/btn_browse"
+        android:id="@+id/btn_test"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="browse album"/>
+        android:text="打印图片的Uri"/>
+
+    <Button
+        android:id="@+id/btn_browse_album"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="用RV浏览图片"/>
 
 </LinearLayout>
