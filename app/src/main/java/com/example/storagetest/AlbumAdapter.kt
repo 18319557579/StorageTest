@@ -1,6 +1,8 @@
 package com.example.storagetest
 
+import android.app.Activity
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +10,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import kotlin.concurrent.thread
 
 class AlbumAdapter(private val context: Context, private val imageList: List<Image>,
     private val checkedImages: MutableMap<String, Image>, private val imageSize: Int,
@@ -48,8 +51,22 @@ class AlbumAdapter(private val context: Context, private val imageList: List<Ima
         } else {
             holder.checkedView.visibility = View.INVISIBLE
         }
+
         val options = RequestOptions().placeholder(R.drawable.album_loading_bg)
             .override(imageSize, imageSize)
         Glide.with(context).load(image.uri).apply(options).into(holder.imageView)
+
+        /*thread {
+                val fd = context.contentResolver.openFileDescriptor(image.uri, "r")
+            if (fd != null) {
+                val bitmap = BitmapFactory.decodeFileDescriptor(fd.fileDescriptor)
+                fd.close()
+                (context as Activity).runOnUiThread {
+                    holder.imageView.setImageBitmap(bitmap)
+                }
+
+            }
+        }*/
+
     }
 }
