@@ -31,4 +31,10 @@
         android:layout_height="wrap_content"
         android:text="下载图片"/>
 
+    <Button
+        android:id="@+id/btn_pick_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选择文件" />
+
 </LinearLayout>
