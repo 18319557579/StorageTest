@@ -18,6 +18,11 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.storagetest.databinding.ActivityMainBinding
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -58,6 +63,7 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM)
             } else {
+                //用的是路径拼接
                 values.put(MediaStore.MediaColumns.DATA, "${Environment.getExternalStorageDirectory().path}/" +
                         "${Environment.DIRECTORY_DCIM}/${displayName}")
             }
@@ -68,6 +74,53 @@ class MainActivity : AppCompatActivity() {
                     bitmap.compress(compressFormat, 100, outputStream)
                     outputStream.close()
                     Toast.makeText(this, "Add bitmap to album succeeded", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        binding.btnDownload.setOnClickListener {
+            val fileUrl = "http://guolin.tech/android.txt"
+            val fileName = "android_hsf.txt"
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                Toast.makeText(this, "你必须使用大于或等于Android10的设备", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            thread {
+                try {
+                    val url = URL(fileUrl)
+                    val connection = (url.openConnection() as HttpURLConnection).also {
+                        it.requestMethod = "GET"
+                        it.connectTimeout = 8000
+                        it.readTimeout = 8000
+                    }
+                    val inputStream = connection.inputStream
+                    val bis = BufferedInputStream(inputStream)
+                    val values = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                    }
+                    val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                    if (uri != null) {
+                        val outputStream = contentResolver.openOutputStream(uri)
+                        if (outputStream != null) {
+                            val bos = BufferedOutputStream(outputStream)
+                            val buffer = ByteArray(1024)
+                            var bytes = bis.read(buffer)
+                            while (bytes >= 0) {
+                                bos.write(buffer, 0, bytes)
+                                bos.flush()
+                                bytes = bis.read(buffer)
+                            }
+                            bos.close()
+                            runOnUiThread {
+                                Toast.makeText(this, "下载完毕", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                    }
+                    bis.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }
